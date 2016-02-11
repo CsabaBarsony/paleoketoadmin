@@ -30,7 +30,7 @@ var HomePage = React.createClass({
 				break;
 			case 'ready':
 				list = _.map(this.state.foods, (food, key) => {
-					var buttons, name, description, paleoOptions, ketoOptions, show;
+					var buttons, name, description, category, paleoOptions, ketoOptions, show;
 
 					if(this.state.editingFoodId) {
 						if(this.state.editingFoodId === food.ndbno) {
@@ -39,6 +39,13 @@ var HomePage = React.createClass({
 									<button onClick={this.save}>Save</button>
 									<button onClick={this.cancel}>Cancel</button>
 								</div>
+							);
+
+							category = (
+								<select ref="categorySelect">
+									<option value="0">choose one...</option>
+									{getCategoryOptions()}
+								</select>
 							);
 
 							paleoOptions = (
@@ -59,6 +66,7 @@ var HomePage = React.createClass({
 						}
 						else {
 							buttons = (<div>...</div>);
+							category = (<span>{food.category}</span>);
 							paleoOptions = (<span>{food.paleo}</span>);
 							ketoOptions = (<span>{food.keto}</span>);
 							name = (<span>{food.name}</span>);
@@ -72,6 +80,7 @@ var HomePage = React.createClass({
 								<button onClick={this.editFood.bind(this, food.ndbno)}>Edit</button>
 							</div>
 						);
+						category = (<span>{food.category}</span>);
 						paleoOptions = (<span>{food.paleo}</span>);
 						ketoOptions = (<span>{food.keto}</span>);
 						name = (<span>{food.name}</span>);
@@ -84,6 +93,7 @@ var HomePage = React.createClass({
 							<td>{food.original_name}</td>
 							<td>{name}</td>
 							<td>{description}</td>
+							<td>{category}</td>
 							<td>{paleoOptions}</td>
 							<td>{ketoOptions}</td>
 							<td>{show}</td>
@@ -105,6 +115,12 @@ var HomePage = React.createClass({
 				return (<option key={value} value={value}>{value}</option>);
 			});
 		}
+		
+		function getCategoryOptions() {
+			return _.map(require('../../food').short, function(food, key) {
+				return (<option key={key} value={food[0]}>{food[0] + '\t' + food[1]}</option>);
+			});
+		}
 
 		return (
 			<div className="bc-home-page">
@@ -118,6 +134,7 @@ var HomePage = React.createClass({
 							<th>originalName</th>
 							<th>name</th>
 							<th>description</th>
+							<th>category</th>
 							<th>paleo</th>
 							<th>keto</th>
 							<th>show</th>

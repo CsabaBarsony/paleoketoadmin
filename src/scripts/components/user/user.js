@@ -110,7 +110,7 @@ var User = React.createClass({
 			});
 		}
 		else {
-			bella.user.set('status', bella.constants.userStatus.GUEST, this);
+			bella.data.user.set('status', bella.constants.userStatus.GUEST, this);
 		}
 	},
 	render: function() {
