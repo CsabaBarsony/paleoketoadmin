@@ -1,5 +1,5 @@
 var cs = require('./helpers/cs');
-//var inspector = require('schema-inspector');
+var inspector = require('schema-inspector');
 var schemas = require('./schemas');
 
 module.exports = {
@@ -67,5 +67,28 @@ module.exports = {
 				callback({ success: true });
 			}
 		});
+	},
+	food: {
+		get: function(categoryId, callback) {
+			cs.get('/foods/' + categoryId, (status, foods) => {
+			});
+		},
+		post: function(food, callback) {
+			var validation = inspector.validate(schemas.food.client, food);
+
+			if (validation.valid) {
+				cs.post('/food', food, (status, food) => {
+					if(status === bella.constants.response.OK) {
+						callback(true, null, food);
+					}
+					else {
+						callback(false, [{ property: 'server', message: 'error' }]);
+					}
+				});
+			}
+			else {
+				callback(validation.valid, validation.error);
+			}
+		}
 	}
 };

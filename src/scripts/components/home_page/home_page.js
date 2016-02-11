@@ -1,9 +1,11 @@
+window.DEBUG_MODE = false;
 var nutrients = require('../../nutrients');
 var cs = require('../../helpers/cs');
+var server = require('../../server');
 
 var HomePage = React.createClass({
 	getInitialState: function() {
-		return { status: 'init', foods: [] };
+		return { status: 'init', foods: [], selectedFoodChecked: false };
 	},
 	componentDidMount: function() {
 		bella.data.user.subscribe((user) => {
@@ -43,7 +45,7 @@ var HomePage = React.createClass({
 
 							category = (
 								<select ref="categorySelect">
-									<option value="0">choose one...</option>
+									<option value="">choose one...</option>
 									{getCategoryOptions()}
 								</select>
 							);
@@ -62,7 +64,7 @@ var HomePage = React.createClass({
 
 							name = (<input type="text" ref="nameInput" />);
 							description = (<input type="text" ref="descriptionInput" />);
-							show = (<input type="checkbox" ref="showCheckbox" />);
+							show = (<input type="checkbox" defaultChecked={food.show} onChange={this.showChange} />);
 						}
 						else {
 							buttons = (<div>...</div>);
@@ -71,7 +73,7 @@ var HomePage = React.createClass({
 							ketoOptions = (<span>{food.keto}</span>);
 							name = (<span>{food.name}</span>);
 							description = (<span>{food.description}</span>);
-							show = (<input type="checkbox" ref="showCheckbox" disabled={true} />);
+							show = (<input type="checkbox" defaultChecked={food.show} onChange={this.showChange} disabled={true} />);
 						}
 					}
 					else {
@@ -85,7 +87,7 @@ var HomePage = React.createClass({
 						ketoOptions = (<span>{food.keto}</span>);
 						name = (<span>{food.name}</span>);
 						description = (<span>{food.description}</span>);
-						show = (<input type="checkbox" ref="showCheckbox" disabled={true} />);
+						show = (<input type="checkbox" defaultChecked={food.show} onChange={this.showChange} disabled={true} />);
 					}
 
 					return (
@@ -155,8 +157,27 @@ var HomePage = React.createClass({
 	editFood: function(foodId) {
 		this.setState({ editingFoodId: foodId });
 	},
+	showChange: function() {
+		this.setState({ selectedFoodChecked: !this.state.selectedFoodChecked });
+	},
 	save: function() {
-		console.log(this.refs.descriptionInput.value);
+		server.food.post({
+			name: this.refs.nameInput.value,
+			description: this.refs.descriptionInput.value,
+			category: this.refs.categorySelect.value,
+			paleo: parseInt(this.refs.paleoSelect.value),
+			keto: parseInt(this.refs.ketoSelect.value),
+			show: this.state.selectedFoodChecked
+		}, (valid, error, food) => {
+			if(valid) {
+
+			}
+			else {
+				var message = 'Validation error!\n';
+				_.each(error, (e) => message += e.property + ': ' + e.message + '\n');
+				alert(message);
+			}
+		});
 	},
 	cancel: function() {
 		this.setState({ editingFoodId: false });

@@ -97,7 +97,8 @@ gulp.task("watch", function() {
 
 	//gulp.watch('./src/**/*.js', ['compile']);
 	gulp.watch('./src/scripts/components/user/**/*.js', ['compileUser']);
-	gulp.watch('./src/scripts/components/home_page/**/*.js', ['compileHomePage']);
+	//gulp.watch('./src/scripts/components/home_page/**/*.js', ['compileHomePage']);
+	gulp.watch('./src/scripts/**/*.js', ['compileHomePage']);
 	gulp.watch('./src/scripts/bella/**/*.js', ['compileBella']);
 	gulp.watch('./src/scripts/quest_list_page/**/*.js', ['compileQuestListPage']);
 	gulp.watch('./src/scripts/quest_page/**/*.js', ['compileQuestPage']);

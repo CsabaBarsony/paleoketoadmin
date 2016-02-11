@@ -1,5 +1,19 @@
 //var _ = require('lodash');
 
+var food = {
+	client: {
+		type: 'object',
+		properties: {
+			name: { type: 'string', minLength: 3 },
+			description: { type: 'string', minLength: 3 },
+			category: { type: 'string', minLength: 1 },
+			paleo: { type: 'integer', eq: [1, 5, 10] },
+			keto: { type: 'integer', eq: [1, 5, 10] },
+			show: { type: 'boolean' }
+		}
+	}
+};
+
 var wish = {
 	blank: function(user) {
 		return {
@@ -100,5 +114,6 @@ var user = {
 module.exports = {
 	wish: wish,
 	wishList: wishList,
-	user: user
+	user: user,
+	food: food
 };

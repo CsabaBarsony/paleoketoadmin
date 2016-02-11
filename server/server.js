@@ -199,3 +199,7 @@ app.get('/foods/:foodGroupId', function(req, res) {
 		}
 	});
 });
+
+app.post('/food', function(req, res) {
+	console.log(req.body);
+});
