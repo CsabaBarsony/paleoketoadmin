@@ -77,9 +77,9 @@ module.exports = {
 			var validation = inspector.validate(schemas.food.client, food);
 
 			if (validation.valid) {
-				cs.post('/food', food, (status, food) => {
+				cs.post('/food', food, (status) => {
 					if(status === bella.constants.response.OK) {
-						callback(true, null, food);
+						callback(true, null);
 					}
 					else {
 						callback(false, [{ property: 'server', message: 'error' }]);

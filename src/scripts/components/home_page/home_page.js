@@ -2,15 +2,14 @@ window.DEBUG_MODE = false;
 var nutrients = require('../../nutrients');
 var cs = require('../../helpers/cs');
 var server = require('../../server');
+var foodShort = require('../../food').short;
 
 var HomePage = React.createClass({
 	getInitialState: function() {
-		return { status: 'init', foods: [], selectedFoodChecked: false };
-	},
-	componentDidMount: function() {
-		bella.data.user.subscribe((user) => {
-			// do what you want!
-		});
+		return {
+			status: 'init',
+			foods: []
+		};
 	},
 	render: function() {
 		var list;
@@ -32,10 +31,10 @@ var HomePage = React.createClass({
 				break;
 			case 'ready':
 				list = _.map(this.state.foods, (food, key) => {
-					var buttons, name, description, category, paleoOptions, ketoOptions, show;
+					var buttons, name, description, category, paleoOptions, ketoOptions, enabled;
 
-					if(this.state.editingFoodId) {
-						if(this.state.editingFoodId === food.ndbno) {
+					if(this.state.selectedFoodId) {
+						if(this.state.selectedFoodId === food.id) {
 							buttons = (
 								<div>
 									<button onClick={this.save}>Save</button>
@@ -44,50 +43,65 @@ var HomePage = React.createClass({
 							);
 
 							category = (
-								<select ref="categorySelect">
+								<select ref="categorySelect" defaultValue={food.category}>
 									<option value="">choose one...</option>
 									{getCategoryOptions()}
 								</select>
 							);
 
 							paleoOptions = (
-								<select ref="paleoSelect">
+								<select ref="paleoSelect" defaultValue={food.paleo}>
 									{getPaleoKetoOptions(food.paleo)}
 								</select>
 							);
 
 							ketoOptions = (
-								<select ref="ketoSelect">
+								<select ref="ketoSelect" defaultValue={food.keto}>
 									{getPaleoKetoOptions(food.keto)}
 								</select>
 							);
 
-							name = (<input type="text" ref="nameInput" />);
-							description = (<input type="text" ref="descriptionInput" />);
-							show = (<input type="checkbox" defaultChecked={food.show} onChange={this.showChange} />);
+							name = (<input type="text" ref="nameInput" defaultValue={food.name} />);
+							description = (<input type="text" ref="descriptionInput" defaultValue={food.description}  />);
+							enabled = (
+								<input
+									type="checkbox"
+									defaultChecked={food.enabled}
+									ref="enabledCheckbox" />
+							);
 						}
 						else {
-							buttons = (<div>...</div>);
-							category = (<span>{food.category}</span>);
+							buttons = (<div></div>);
+							category = (<span>{_.find(foodShort, (short) => short[0] === food.category)}</span>);
 							paleoOptions = (<span>{food.paleo}</span>);
 							ketoOptions = (<span>{food.keto}</span>);
 							name = (<span>{food.name}</span>);
 							description = (<span>{food.description}</span>);
-							show = (<input type="checkbox" defaultChecked={food.show} onChange={this.showChange} disabled={true} />);
+							enabled = (
+								<input
+									type="checkbox"
+									defaultChecked={food.enabled}
+									disabled={true} />
+							);
 						}
 					}
 					else {
 						buttons = (
 							<div>
-								<button onClick={this.editFood.bind(this, food.ndbno)}>Edit</button>
+								<button onClick={this.editFood.bind(this, food.id)}>Edit</button>
 							</div>
 						);
-						category = (<span>{food.category}</span>);
+						category = (<span>{_.find(foodShort, (short) => short[0] === food.category)}</span>);
 						paleoOptions = (<span>{food.paleo}</span>);
 						ketoOptions = (<span>{food.keto}</span>);
 						name = (<span>{food.name}</span>);
 						description = (<span>{food.description}</span>);
-						show = (<input type="checkbox" defaultChecked={food.show} onChange={this.showChange} disabled={true} />);
+						enabled = (
+							<input
+								type="checkbox"
+								defaultChecked={food.enabled}
+								disabled={true} />
+						);
 					}
 
 					return (
@@ -98,7 +112,7 @@ var HomePage = React.createClass({
 							<td>{category}</td>
 							<td>{paleoOptions}</td>
 							<td>{ketoOptions}</td>
-							<td>{show}</td>
+							<td>{enabled}</td>
 							<td>{buttons}</td>
 						</tr>
 					);
@@ -106,29 +120,29 @@ var HomePage = React.createClass({
 				break;
 		}
 
-		function getOptions() {
+		function getFoodGroupOptions() {
 			return _.map(nutrients.foodGroups, function(foodGroup, key) {
 				return (<option key={foodGroup} value={foodGroup}>{key}</option>);
 			});
 		}
 
-		function getPaleoKetoOptions(defaultValue) {
+		function getPaleoKetoOptions() {
 			return _.map([10, 5, 1], function(value) {
 				return (<option key={value} value={value}>{value}</option>);
 			});
 		}
 		
 		function getCategoryOptions() {
-			return _.map(require('../../food').short, function(food, key) {
+			return _.map(foodShort, function(food, key) {
 				return (<option key={key} value={food[0]}>{food[0] + '\t' + food[1]}</option>);
 			});
 		}
 
 		return (
 			<div className="bc-home-page">
-				<select onChange={this.selectChange}>
+				<select onChange={this.selectFoodGroupChange}>
 					<option value="0">...</option>
-					{getOptions()}
+					{getFoodGroupOptions()}
 				</select>
 				<table>
 					<thead>
@@ -139,7 +153,7 @@ var HomePage = React.createClass({
 							<th>category</th>
 							<th>paleo</th>
 							<th>keto</th>
-							<th>show</th>
+							<th>enabled</th>
 							<th></th>
 						</tr>
 					</thead>
@@ -150,37 +164,49 @@ var HomePage = React.createClass({
 			</div>
 		);
 	},
-	selectChange: function(e) {
+	selectFoodGroupChange: function(e) {
 		this.getNutrientData(e.target.value);
-		this.setState({ status: 'loading', editingFoodId: false });
+		this.setState({
+			status: 'loading',
+			selectedFoodId: false,
+			selectedFoodGroupId: e.target.value
+		});
 	},
-	editFood: function(foodId) {
-		this.setState({ editingFoodId: foodId });
-	},
-	showChange: function() {
-		this.setState({ selectedFoodChecked: !this.state.selectedFoodChecked });
+	editFood: function(id) {
+		this.setState({ selectedFoodId: id });
 	},
 	save: function() {
-		server.food.post({
+		//this.setState({ status: 'loading' });
+		var food = {
+			id: this.state.selectedFoodId,
 			name: this.refs.nameInput.value,
 			description: this.refs.descriptionInput.value,
 			category: this.refs.categorySelect.value,
 			paleo: parseInt(this.refs.paleoSelect.value),
 			keto: parseInt(this.refs.ketoSelect.value),
-			show: this.state.selectedFoodChecked
-		}, (valid, error, food) => {
+			enabled: this.refs.enabledCheckbox.checked
+		};
+		server.food.post(food, (valid, error) => {
 			if(valid) {
-
+				var foods = _.clone(this.state.foods);
+				var editedFood = _.find(foods, (f) => food.id === f.id);
+				_.merge(editedFood, food);
+				this.setState({
+					selectedFoodId: false,
+					status: 'ready',
+					foods: foods
+				});
 			}
 			else {
-				var message = 'Validation error!\n';
+				var message = 'Error! \n';
 				_.each(error, (e) => message += e.property + ': ' + e.message + '\n');
 				alert(message);
+				this.setState({ status: 'ready' });
 			}
 		});
 	},
 	cancel: function() {
-		this.setState({ editingFoodId: false });
+		this.setState({ selectedFoodId: false });
 	},
 	getNutrientData: function(foodGroup) {
 		cs.get('/foods/' + foodGroup , (status, foods) => {

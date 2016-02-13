@@ -1,15 +1,14 @@
-//var _ = require('lodash');
-
 var food = {
 	client: {
 		type: 'object',
 		properties: {
+			id: { type: 'integer' },
 			name: { type: 'string', minLength: 3 },
-			description: { type: 'string', minLength: 3 },
+			description: { type: 'string' },
 			category: { type: 'string', minLength: 1 },
 			paleo: { type: 'integer', eq: [1, 5, 10] },
 			keto: { type: 'integer', eq: [1, 5, 10] },
-			show: { type: 'boolean' }
+			enabled: { type: 'boolean' }
 		}
 	}
 };

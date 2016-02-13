@@ -11,7 +11,7 @@ var cs = {
 					var response = xhr.response ? JSON.parse(xhr.response) : null;
 					callback(xhr.status, response);
 				}
-				else if (xhr.status === 404) {
+				else if (xhr.status < 500) {
 					callback(xhr.status);
 				}
 				else {
@@ -31,7 +31,7 @@ var cs = {
 					var response = xhr.response ? JSON.parse(xhr.response) : null;
 					callback(xhr.status, response);
 				}
-				else if(xhr.status === 404) {
+				else if(xhr.status < 500) {
 					callback(xhr.status);
 				}
 				else {

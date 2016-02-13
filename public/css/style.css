@@ -37,3 +37,17 @@ section#main-section {
 	background-color: #c3f0ff;
 	padding: 10px;
 }
+
+table {
+	width: 100%;
+}
+
+tr {
+	white-space: nowrap;
+	height: 23px;
+}
+
+td:first-child {
+	max-width: 300px;
+	overflow: hidden;
+}

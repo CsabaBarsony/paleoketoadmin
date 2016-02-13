@@ -195,11 +195,27 @@ app.get('/foods/:foodGroupId', function(req, res) {
 			res.send(rows);
 		}
 		else {
-			res.status(500).send();
+			res.status(400).send();
 		}
 	});
 });
 
 app.post('/food', function(req, res) {
-	console.log(req.body);
+	db.query('UPDATE `nutrients` SET' +
+		'  `name` = \'' 					+ req.body.name +
+		'\', `description` = \'' 			+ req.body.description +
+		'\', `category` = \'' 				+ req.body.category +
+		'\', `paleo` = \'' 					+ req.body.paleo +
+		'\', `keto` = \'' 					+ req.body.keto +
+		'\', `enabled` = \'' 				+ (req.body.enabled ? 1 : 0) +
+		'\' WHERE `nutrients`.`id` = ' 		+ req.body.id +
+		';', function(err) {
+		if(err) {
+			console.log(err);
+			res.status(400).send();
+		}
+		else {
+			res.send();
+		}
+	});
 });
